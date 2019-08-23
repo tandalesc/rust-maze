@@ -11,7 +11,7 @@ use opengl_graphics::{ GlGraphics, OpenGL };
 use std::{thread, time};
 
 const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 const YELLOW: [f32; 4] = [1.0, 0.8, 0.0, 1.0];
 const BLUE: [f32; 4] = [0.0, 0.0, 1.0, 1.0];
 const RESOLUTION: [u32; 2] = [1280, 800];
@@ -56,26 +56,32 @@ impl App {
             gl: gl,
             maze: Maze {
                 maze_size_x: 16,
-                maze_size_y: 10,
-                goal_x: 12,
-                goal_y: 2,
+                maze_size_y: 16,
+                goal_x: 7,
+                goal_y: 7,
                 maze_layout: vec![
                     vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                    vec![0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,1],
-                    vec![0,0,1,0,0,0,0,0,0,1,1,0,0,1,0,0],
-                    vec![0,1,1,1,1,1,1,1,0,1,1,0,1,1,1,0],
-                    vec![0,1,0,0,1,1,1,1,1,1,0,0,0,1,1,0],
-                    vec![0,1,1,0,1,0,0,0,0,1,0,1,0,1,1,0],
-                    vec![0,0,0,0,0,0,1,0,1,1,0,0,1,1,1,0],
-                    vec![1,1,1,1,0,0,1,0,1,1,1,0,0,1,0,0],
-                    vec![0,0,0,1,1,1,1,0,1,1,1,1,0,1,0,1],
-                    vec![0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1]
+                    vec![0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+                    vec![0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                    vec![0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,0],
+                    vec![0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,1,0,1,1,1,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0],
+                    vec![0,1,0,1,0,1,1,1,1,1,1,0,0,0,1,0],
+                    vec![0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0],
+                    vec![0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,0],
+                    vec![0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                    vec![0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0],
+                    vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                 ]
             },
             player: Player {
                 position_x: 0,
-                position_y: 9,
-                maze_memory: vec![vec![0.0; 16]; 10]
+                position_y: 0,
+                maze_memory: vec![vec![0.0; 16]; 16]
             }
         }
     }
@@ -118,7 +124,7 @@ impl App {
                     if *col!=0.0 {
                         let tx = (col_i as f64)*SQUARE_SIZE + (maze_size_x*SQUARE_SIZE);
                         let ty = (row_i as f64)*SQUARE_SIZE;
-                        let opacity: f32 = ((*col as f32) / 30.0).min(1.0);
+                        let opacity: f32 = ((*col as f32) / 25.0).min(1.0);
                         rectangle([0.0, 1.0, 0.0, opacity], square, c.transform.trans(tx, ty), gl);
                     }
                 }
@@ -132,12 +138,16 @@ impl App {
     }
 
     fn objective(&self, new_x: usize, new_y: usize) -> f64 {
-        let gx = self.maze.goal_x as f64;
-        let gy = self.maze.goal_y as f64;
-        let mx = new_x as f64;
-        let my = new_y as f64;
-        //distance formula
-        ((mx-gx)*(mx-gx)+(my-gy)*(my-gy)).sqrt()
+        if self.maze.maze_layout[new_y][new_x]!=0 {
+            std::f64::MAX
+        } else {
+            let gx = self.maze.goal_x as f64;
+            let gy = self.maze.goal_y as f64;
+            let mx = new_x as f64;
+            let my = new_y as f64;
+            //distance formula
+            ((mx-gx)*(mx-gx)+(my-gy)*(my-gy)).sqrt()
+        }
     }
 
     fn update(&mut self, _args: &UpdateArgs) {
